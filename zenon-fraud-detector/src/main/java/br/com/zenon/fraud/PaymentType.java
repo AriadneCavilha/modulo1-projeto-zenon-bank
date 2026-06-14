@@ -1,8 +1,8 @@
 package br.com.zenon.fraud;
 
 public enum PaymentType {
-    CASHIN,
-    CASHOUT,
+    CASH_IN,
+    CASH_OUT,
     DEBIT,
     PAYMENT,
     TRANSFER;
