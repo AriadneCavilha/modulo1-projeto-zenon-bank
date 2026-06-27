@@ -1,48 +1,80 @@
 package br.com.zenon.fraud;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 public class TransactionIngestor {
 
-    public List<Transaction> readFile(String fileName) throws Exception {
-        List<Transaction> lista = new ArrayList<>();
-        try(BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            br.readLine();
-            for(int i = 0 ; i < 1000 ; i++) {
-                    List<String> separadorRegistros = List.of(br.readLine().split(","));
+    public List<Transaction> readFile(String fileName) {
+        //aqui ele cria uma representação do caminho
+        Path path = Path.of(fileName);
+        try {
+            // aqui ele faz a leitura do arquivo baseado no path
+            List<String>lines = Files.readAllLines(path);
 
-                    int step = Integer.parseInt(separadorRegistros.get(0));
-                    PaymentType payment = PaymentType.valueOf(separadorRegistros.get(1));
-                    BigDecimal amount = new BigDecimal(separadorRegistros.get(2));
-                    String nameOrigin = separadorRegistros.get(3);
-                    BigDecimal oldBalanceOrigin = new BigDecimal(separadorRegistros.get(4));
-                    BigDecimal newBalanceOrigin = new BigDecimal(separadorRegistros.get(5));
-                    String nameDest = separadorRegistros.get(6);
-                    BigDecimal oldBalanceDest = new BigDecimal(separadorRegistros.get(7));
-                    BigDecimal newBalanceDest = new BigDecimal(separadorRegistros.get(8));
-                    boolean isFraud = transformadorBooleano(Integer.parseInt(separadorRegistros.get(9)));
-                    boolean isFlaggedFraud = transformadorBooleano(Integer.parseInt(separadorRegistros.get(10)));
-
-                    Transaction transaction = new Transaction(step, payment, amount,
-                            new TransactionCustomer(nameOrigin, oldBalanceOrigin, newBalanceOrigin),
-                            new TransactionCustomer(nameDest, oldBalanceDest, newBalanceDest),
-                            isFraud, isFlaggedFraud);
-
-                    lista.add(transaction);
-            }
-
+            /*
+            Para que serve o Map? Ele vai transformar cada elemento da stream em outro valor
+            Ele apenas diz:
+            “Para cada item que passar por aqui, aplique essa função e devolva o resultado.”
+             */
+            List<Transaction> transactions = lines
+                                            .stream()
+                                            .skip(1)
+                                            .map(this::parseLines)
+                                            .limit(100)
+                                            .filter(Optional::isPresent)
+                                            .map(Optional::get)
+                                            //dps disso como a gente tem certeza que sempre vai ter uma transação, a gente pega o valor do optional
+                                            .toList();
+            return transactions;
         } catch (Exception e) {
-            throw new Exception(e.getMessage());
+            throw  new RuntimeException(e.getMessage());
         }
-
-        return lista;
     }
 
-    public boolean transformadorBooleano(int valor) {
-        return valor == 0 ? false : true;
+    /*
+    Com o optional a gente deixa claro que pode ser que não tenha resultado
+    dessa transação
+     */
+    private Optional<Transaction> parseLines(String line) {
+        try {
+            String[] parts = line.split(",");
+
+            int step = Integer.parseInt(parts[0]);
+            Optional<PaymentType> paymentType = Optional.of(PaymentType.valueOf(parts[1]));
+
+            BigDecimal amount = new BigDecimal(parts[2]);
+
+            String nameOrigin = parts[3];
+            BigDecimal oldBalanceOrigin = new BigDecimal(parts[4]);
+            BigDecimal newBalanceOrigin = new BigDecimal(parts[5]);
+            String nameDestination = parts[6];
+            BigDecimal oldBalanceDestination = new BigDecimal(parts[7]);
+            BigDecimal newBalanceDestination = new BigDecimal(parts[8]);
+            boolean isFraud = transformBoolean(parts[9]);
+            boolean isFlaggedFraud = transformBoolean(parts[10]);
+
+            TransactionCustomer transactionCustomerOrigin = new TransactionCustomer(nameOrigin, oldBalanceOrigin, newBalanceOrigin);
+            TransactionCustomer transactionCustomerDestination = new TransactionCustomer(nameDestination, oldBalanceDestination, newBalanceDestination);
+
+            return Optional.of(new Transaction(step, paymentType.get(),
+                                amount,
+                                transactionCustomerOrigin,
+                                transactionCustomerDestination,
+                                isFraud,
+                                isFlaggedFraud));
+        } catch (Exception e) {
+            System.out.println("Erro: " + e);
+            return Optional.empty();
+        }
+    }
+
+    private boolean transformBoolean(String value) {
+        return value.equals("1");
     }
 }
+

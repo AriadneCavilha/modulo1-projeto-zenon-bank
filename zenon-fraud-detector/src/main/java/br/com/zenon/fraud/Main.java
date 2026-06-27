@@ -14,18 +14,19 @@ public class Main {
 
 
         Transaction transactionTwo = new Transaction(743, PaymentType.CASH_OUT,
-                new BigDecimal("850002.52"),
-                new TransactionCustomer("C1280323807", new BigDecimal("850002.52"), new BigDecimal("0.0")),
-                new TransactionCustomer("C873221189", new BigDecimal("6510099.11"), new BigDecimal("7360101.63")),
-                true,
-                false);
+                                    new BigDecimal("850002.52"),
+                                    new TransactionCustomer("C1280323807", new BigDecimal("850002.52"), new BigDecimal("0.0")),
+                                    new TransactionCustomer("C873221189", new BigDecimal("6510099.11"), new BigDecimal("7360101.63")),
+                                    true,
+                                    false);
 
         System.out.println(transactionOne);
         IO.println(transactionOne);
 
         TransactionIngestor ingestor = new TransactionIngestor();
-        List<Transaction> lista = ingestor.readFile("data/payment.csv");
 
-        lista.stream().limit(10).forEach(System.out::println);
+        System.out.println("--------------------BAD-DATA-------------------");
+        List<Transaction> listaBadData = ingestor.readFile("data/payment.csv");
+        listaBadData.forEach(System.out::println);
     }
 }
