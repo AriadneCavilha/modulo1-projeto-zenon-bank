@@ -25,8 +25,18 @@ public class Main {
 
         TransactionIngestor ingestor = new TransactionIngestor();
 
-        System.out.println("--------------------BAD-DATA-------------------");
-        List<Transaction> listaBadData = ingestor.readFile("data/payment.csv");
-        listaBadData.forEach(System.out::println);
+        System.out.println("------------TRAINING-STREAMS--------------");
+        List<Transaction> list = ingestor.readFile("data/payment_data.csv", 50000);
+        FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(list);
+
+        System.out.println("1. Total de Fraudes: " + fraudAnalyzer.fraudTransactions());
+
+        System.out.println("2. Top 3 fraudes de maior valor: ");
+        fraudAnalyzer.topTreeAmountFrauds().forEach(System.out::println);
+
+        System.out.println("3. Clientes suspeitos: ");
+        fraudAnalyzer.findTopSuspiciousClients().forEach(System.out::println);
+
+        System.out.println("4. Prejuízo Total: " + fraudAnalyzer.totalAmountFrauds());
     }
 }

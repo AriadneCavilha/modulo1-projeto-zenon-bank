@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class TransactionIngestor {
 
-    public List<Transaction> readFile(String fileName) {
+    public List<Transaction> readFile(String fileName, int numberMaxLines) {
         //aqui ele cria uma representação do caminho
         Path path = Path.of(fileName);
         try {
@@ -25,7 +25,7 @@ public class TransactionIngestor {
                                             .stream()
                                             .skip(1)
                                             .map(this::parseLines)
-                                            .limit(100)
+                                            .limit(numberMaxLines)
                                             .filter(Optional::isPresent)
                                             .map(Optional::get)
                                             //dps disso como a gente tem certeza que sempre vai ter uma transação, a gente pega o valor do optional
