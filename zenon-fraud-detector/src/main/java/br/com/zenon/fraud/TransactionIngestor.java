@@ -45,7 +45,7 @@ public class TransactionIngestor {
             String[] parts = line.split(",");
 
             int step = Integer.parseInt(parts[0]);
-            Optional<PaymentType> paymentType = Optional.of(PaymentType.valueOf(parts[1]));
+            PaymentType paymentType = PaymentType.valueOf(parts[1]);
 
             BigDecimal amount = new BigDecimal(parts[2]);
 
@@ -61,7 +61,7 @@ public class TransactionIngestor {
             TransactionCustomer transactionCustomerOrigin = new TransactionCustomer(nameOrigin, oldBalanceOrigin, newBalanceOrigin);
             TransactionCustomer transactionCustomerDestination = new TransactionCustomer(nameDestination, oldBalanceDestination, newBalanceDestination);
 
-            return Optional.of(new Transaction(step, paymentType.get(),
+            return Optional.of(new Transaction(step, paymentType,
                                 amount,
                                 transactionCustomerOrigin,
                                 transactionCustomerDestination,
