@@ -25,18 +25,27 @@ public class Main {
 
         TransactionIngestor ingestor = new TransactionIngestor();
 
-        System.out.println("------------TRAINING-STREAMS--------------");
-        List<Transaction> list = ingestor.readFile("data/payment_data.csv", 50000);
+        System.out.println("------------TRAINING-BENCHMARK--------------");
+        List<Transaction> list = ingestor.readFile("data/payment_data.csv", 100000);
         FraudAnalyzer fraudAnalyzer = new FraudAnalyzer(list);
+        TransactionListRepository listRepository = new TransactionListRepository(list);
 
-        System.out.println("1. Total de Fraudes: " + fraudAnalyzer.fraudTransactions());
+        System.out.println(listRepository.searchTransaction("C12345"));
+        long startTime = System.nanoTime();
+        listRepository.searchTransaction("C1231006815");
+        long endTime = System.nanoTime();
 
-        System.out.println("2. Top 3 fraudes de maior valor: ");
-        fraudAnalyzer.topTreeAmountFrauds().forEach(System.out::println);
+        System.out.println("Tempo total: " + (endTime - startTime));
 
-        System.out.println("3. Clientes suspeitos: ");
-        fraudAnalyzer.findTopSuspiciousClients().forEach(System.out::println);
+        TransactionMapRepository mapRepository = new TransactionMapRepository(list);
 
-        System.out.println("4. Prejuízo Total: " + fraudAnalyzer.totalAmountFrauds());
+
+        System.out.println(mapRepository.searchTransaction("C12345"));
+        long startTimeMap = System.nanoTime();
+        mapRepository.searchTransaction("C1231006815");
+        long endTimeMap = System.nanoTime();
+
+        System.out.println("Tempo total: " + (endTimeMap - startTimeMap));
+
     }
 }
